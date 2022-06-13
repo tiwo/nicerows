@@ -16,7 +16,7 @@ Example:
 ## To Do
 
 - [ ] Expose the error state (via an Err() error method)
-- [ ] Make the first parameter of New(), sqlresult, an interface to remove the
+- [x] Make the first parameter of New(), sqlresult, an interface to remove the
       database/sql dependency
 - [ ] Create a mock sqlresult type that can simulate syntax/database/connection
       errors

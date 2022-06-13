@@ -1,21 +1,28 @@
 package nicerows
 
 import (
-	"database/sql"
 	"encoding/json"
 )
 
+// The core type of nicerows
 type NiceRows struct {
-	sqlresult *sql.Rows
+	sqlresult SqlResult
 	colnames  []string
 	err       error
+}
+
+// An interface compatible with sql.Rows (from database/sql)
+type SqlResult interface {
+	Columns() ([]string, error)
+	Next() bool
+	Scan(dest ...any) error
 }
 
 // Create a new NiceRows struct.
 // It keeps minimal state, but should work in the sense that eg. losing the
 // network connection to the database will stop the iteration and signal
 // the error in the err field
-func New(sqlresult *sql.Rows, err error) *NiceRows {
+func New(sqlresult SqlResult, err error) *NiceRows {
 
 	nr := &NiceRows{
 		sqlresult: sqlresult,

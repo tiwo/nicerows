@@ -149,7 +149,7 @@ func TestJsonlines(t *testing.T) {
 	db := exampledb()
 	rows, err := db.Query(` Select * from "t1"; `)
 	nr := New(rows, err)
-	it := nr.IterateJsonlines()
+	it := nr.IterateJson()
 
 	actual := <-it
 	if actual != `["a","b","c","d","e"]` {

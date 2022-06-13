@@ -104,7 +104,7 @@ func (nr *NiceRows) IterateMaps() chan map[string]any {
 
 }
 
-func (nr *NiceRows) IterateJsonlines() chan string {
+func (nr *NiceRows) IterateJson() chan string {
 
 	out := make(chan string)
 

@@ -104,6 +104,14 @@ func (nr *NiceRows) IterateMaps() chan map[string]any {
 
 }
 
+func bytearray2string(thing any) any {
+	blob, ok := thing.([]byte)
+	if ok {
+		return string(blob)
+	}
+	return thing
+}
+
 func (nr *NiceRows) IterateJson() chan string {
 
 	out := make(chan string)
@@ -115,12 +123,10 @@ func (nr *NiceRows) IterateJson() chan string {
 
 		for slice := range it {
 
-			for i, s := range slice {
-				blob, ok := s.([]byte)
-				if ok {
-					slice[i] = string(blob)
-				}
-
+			for i, val := range slice {
+				// SQL strings come as []byte, I want them to convert to JSON strings.
+				// Maybe it would be better to create custom json.Encoder or json.Marshaler?
+				slice[i] = bytearray2string(val)
 			}
 
 			js, err := json.Marshal(slice)

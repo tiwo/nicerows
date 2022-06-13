@@ -36,7 +36,7 @@ func anypointers(length int) ([]any, []any) {
 	return values, pointers
 }
 
-func (nr *NiceRows) IterateSlices(includeheader bool) chan []any {
+func (nr *NiceRows) IterateSlices() chan []any {
 
 	out := make(chan []any)
 
@@ -45,18 +45,17 @@ func (nr *NiceRows) IterateSlices(includeheader bool) chan []any {
 		return out
 	}
 
-	length := len(nr.colnames)
-
 	go func() {
 		defer close(out)
 
-		if includeheader {
-			header := make([]any, length)
-			for i, name := range nr.colnames {
-				header[i] = name
-			}
-			out <- header
+		length := len(nr.colnames)
+
+		// send the column names as first slice:
+		header := make([]any, length)
+		for i, name := range nr.colnames {
+			header[i] = name
 		}
+		out <- header
 
 		for nr.sqlresult.Next() {
 			values, pointers := anypointers(length)
@@ -105,11 +104,11 @@ func (nr *NiceRows) IterateMaps() chan map[string]any {
 
 }
 
-func (nr *NiceRows) IterateJsonlines(includeheader bool) chan string {
+func (nr *NiceRows) IterateJsonlines() chan string {
 
 	out := make(chan string)
 
-	it := nr.IterateSlices(includeheader)
+	it := nr.IterateSlices()
 
 	go func() {
 		defer close(out)

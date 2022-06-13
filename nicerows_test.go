@@ -51,16 +51,21 @@ func TestIterateSlices(t *testing.T) {
 	db := exampledb()
 	rows, err := db.Query(` Select * from "t1"; `)
 	nr := New(rows, err)
-	it := nr.IterateSlices(false)
+	it := nr.IterateSlices()
 
 	actual := fmt.Sprintf("%#v", <-it)
+	if actual != `[]interface {}{"a", "b", "c", "d", "e"}` {
+		t.Fatalf("Header!, %v", actual)
+	}
+
+	actual = fmt.Sprintf("%#v", <-it)
 	if actual != `[]interface {}{1, "foo", 0, -2.5, interface {}(nil)}` {
-		t.Fatal("Iteration 1!")
+		t.Fatal("Row 1!")
 	}
 
 	actual = fmt.Sprintf("%#v", <-it)
 	if actual != `[]interface {}{2, "bar", 10, -7.5, []uint8{0x41, 0x42, 0x43}}` {
-		t.Fatal("Iteration 2!")
+		t.Fatal("Row 2!")
 	}
 
 	_, ok := <-it
@@ -81,7 +86,11 @@ func TestIterateinfinity(t *testing.T) {
 		)
 		select "n" from "numbers"
 	`)
-	it := New(rows, err).IterateSlices(false)
+	it := New(rows, err).IterateSlices()
+
+	if fmt.Sprintf("%v", <-it) != "[n]" {
+		t.Fatal("Header!")
+	}
 	for i := 0; i < 1000; i++ {
 		row, ok := <-it
 
@@ -104,7 +113,7 @@ func TestIncludeHeader(t *testing.T) {
 		Select * from "t1";
 	`)
 	nr := New(rows, err)
-	it := nr.IterateSlices(true)
+	it := nr.IterateSlices()
 	hdr := <-it
 
 	actual := fmt.Sprintf("%v", hdr)
@@ -125,7 +134,7 @@ func TestSqlSyntaxError(t *testing.T) {
 		t.Fatalf("Nonsensical SQL should produce an error, but returns %#v", nr.err)
 	}
 
-	it := nr.IterateSlices(false)
+	it := nr.IterateSlices()
 	for row := range it {
 		t.Fatalf("Nonsensical SQL should not yield any rows, but does: %#v", row)
 	}
@@ -140,7 +149,7 @@ func TestJsonlines(t *testing.T) {
 	db := exampledb()
 	rows, err := db.Query(` Select * from "t1"; `)
 	nr := New(rows, err)
-	it := nr.IterateJsonlines(true)
+	it := nr.IterateJsonlines()
 
 	actual := <-it
 	if actual != `["a","b","c","d","e"]` {

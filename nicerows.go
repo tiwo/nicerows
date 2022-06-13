@@ -11,6 +11,10 @@ type NiceRows struct {
 	err       error
 }
 
+// Create a new NiceRows struct.
+// It keeps minimal state, but should work in the sense that eg. losing the
+// network connection to the database will stop the iteration and signal
+// the error in the err field
 func New(sqlresult *sql.Rows, err error) *NiceRows {
 
 	nr := &NiceRows{
@@ -27,6 +31,8 @@ func New(sqlresult *sql.Rows, err error) *NiceRows {
 	return nr
 }
 
+// return a slice of values, and a slice of pointers to each of them,
+// suitable to retrieve a row from database/sql via `_=sql.Rows.Scan(pointers...)`
 func anypointers(length int) ([]any, []any) {
 	values := make([]any, length)
 	pointers := make([]any, length)
@@ -36,6 +42,7 @@ func anypointers(length int) ([]any, []any) {
 	return values, pointers
 }
 
+// Iterate over all rows, as `[]any` slices
 func (nr *NiceRows) IterateSlices() chan []any {
 
 	out := make(chan []any)
@@ -70,6 +77,10 @@ func (nr *NiceRows) IterateSlices() chan []any {
 	return out
 }
 
+// Iterate over all rows, as `map[string]any` maps.
+// Note that the names come from the SQL driver and ultimately from the
+// SQL query or database scheme; if those column names are not unique,
+// later columns will eclipse former ones with the same name.
 func (nr *NiceRows) IterateMaps() chan map[string]any {
 
 	out := make(chan map[string]any)
@@ -104,6 +115,7 @@ func (nr *NiceRows) IterateMaps() chan map[string]any {
 
 }
 
+// Convert arguments of []byte type to string; return anything else unchanged.
 func bytearray2string(thing any) any {
 	blob, ok := thing.([]byte)
 	if ok {
@@ -112,6 +124,7 @@ func bytearray2string(thing any) any {
 	return thing
 }
 
+// Iterate over all rows, as JSON arrays.
 func (nr *NiceRows) IterateJson() chan string {
 
 	out := make(chan string)

@@ -161,3 +161,32 @@ func (nr *NiceRows) IterateJson() chan string {
 
 	return out
 }
+
+func (nr *NiceRows) IterateJsonObjects() chan string {
+	out := make(chan string)
+	it := nr.IterateMaps()
+
+	go func() {
+		defer close(out)
+		for in := range it {
+
+			m := make(map[string]any)
+			for key, val := range in {
+				m[key] = bytearray2string(val)
+			}
+
+			js, err := json.Marshal(m)
+
+			if err != nil {
+				nr.err = err
+				return
+			}
+
+			out <- string(js)
+
+		}
+
+	}()
+
+	return out
+}

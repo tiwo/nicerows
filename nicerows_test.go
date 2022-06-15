@@ -176,3 +176,26 @@ func TestJsonlines(t *testing.T) {
 values (1, "foo", 0, -2.5, NULL),
 (2, "bar", 10, -7.5, x'414243')
 */
+
+func TestJsonObjects(t *testing.T) {
+	db := exampledb()
+	rows, err := db.Query(` Select * from "t1"; `)
+	nr := New(rows, err)
+	it := nr.IterateJsonObjects()
+
+	actual := <-it
+	if actual != `{"a":1,"b":"foo","c":0,"d":-2.5,"e":null}` {
+		t.Fatalf("first row: %v", actual)
+	}
+
+	actual = <-it
+	if actual != `{"a":2,"b":"bar","c":10,"d":-7.5,"e":"ABC"}` {
+		t.Fatalf("first row: %v", actual)
+	}
+
+	_, ok := <-it
+	if ok {
+		t.Fatalf("Iterator continued after last row")
+	}
+
+}

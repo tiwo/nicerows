@@ -8,7 +8,7 @@ import (
 type NiceRows struct {
 	sqlresult SqlResult
 	colnames  []string
-	err       error
+	Err       error
 }
 
 // An interface compatible with sql.Rows (from database/sql)
@@ -27,14 +27,14 @@ func New(sqlresult SqlResult, err error) *NiceRows {
 	nr := &NiceRows{
 		sqlresult: sqlresult,
 		colnames:  nil,
-		err:       err,
+		Err:       err,
 	}
 
 	if err != nil {
 		return nr
 	}
 
-	nr.colnames, nr.err = sqlresult.Columns()
+	nr.colnames, nr.Err = sqlresult.Columns()
 	return nr
 }
 
@@ -43,7 +43,7 @@ func (nr *NiceRows) IterateSlices() chan []any {
 
 	out := make(chan []any)
 
-	if nr.err != nil {
+	if nr.Err != nil {
 		close(out)
 		return out
 	}
@@ -62,8 +62,8 @@ func (nr *NiceRows) IterateSlices() chan []any {
 
 		for nr.sqlresult.Next() {
 			values, pointers := anypointers(length)
-			nr.err = nr.sqlresult.Scan(pointers...)
-			if nr.err != nil {
+			nr.Err = nr.sqlresult.Scan(pointers...)
+			if nr.Err != nil {
 				return
 			}
 			out <- values
@@ -81,7 +81,7 @@ func (nr *NiceRows) IterateMaps() chan map[string]any {
 
 	out := make(chan map[string]any)
 
-	if nr.err != nil {
+	if nr.Err != nil {
 		close(out)
 		return out
 	}
@@ -92,8 +92,8 @@ func (nr *NiceRows) IterateMaps() chan map[string]any {
 
 		for nr.sqlresult.Next() {
 			values, pointers := anypointers(length)
-			nr.err = nr.sqlresult.Scan(pointers...)
-			if nr.err != nil {
+			nr.Err = nr.sqlresult.Scan(pointers...)
+			if nr.Err != nil {
 				return
 			}
 
@@ -132,7 +132,7 @@ func (nr *NiceRows) IterateJson() chan string {
 			js, err := json.Marshal(slice)
 
 			if err != nil {
-				nr.err = err
+				nr.Err = err
 				return
 			}
 			out <- string(js)
@@ -158,7 +158,7 @@ func (nr *NiceRows) IterateJsonObjects() chan string {
 			js, err := json.Marshal(m)
 
 			if err != nil {
-				nr.err = err
+				nr.Err = err
 				return
 			}
 

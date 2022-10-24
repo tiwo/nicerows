@@ -119,8 +119,8 @@ func TestSqlSyntaxError(t *testing.T) {
 	`)
 	nr := New(rows, err)
 
-	if nr.err == nil {
-		t.Fatalf("Nonsensical SQL should produce an error, but returns %#v", nr.err)
+	if nr.Err == nil {
+		t.Fatalf("Nonsensical SQL should produce an error, but returns %#v", nr.Err)
 	}
 
 	it := nr.IterateSlices()
@@ -128,8 +128,8 @@ func TestSqlSyntaxError(t *testing.T) {
 		t.Fatalf("Nonsensical SQL should not yield any rows, but does: %#v", row)
 	}
 
-	if nr.err == nil {
-		t.Fatalf("Nonsensical SQL should produce an error, but returns %#v", nr.err)
+	if nr.Err == nil {
+		t.Fatalf("Nonsensical SQL should produce an error, but returns %#v", nr.Err)
 	}
 
 }
